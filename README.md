@@ -12,7 +12,7 @@
 
 tmp 文件夹下
 
-![1553264280882](images\1553264280882.png)
+![1553264280882](https://github.com/xuanzebi/BERT-NER/blob/master/images/1553264280882.png)
 
 如上图，对数据集进行了分割，其中source是训练集中文，target是训练集的label。
 
@@ -42,6 +42,8 @@ test1 测试集，test_tgt 测试集label。     dev 验证集   dev-lable 验�
 
 
 
-> 参考 ：https://github.com/google-research/bert   官方
+> 参考 ：
 >
->             https://github.com/kyzhouhzau/BERT-NER  基于英文的NER，但是代码注释不太多。
+> https://github.com/google-research/bert   官方
+>
+> https://github.com/kyzhouhzau/BERT-NER  基于英文的NER，但是代码注释不太多。
