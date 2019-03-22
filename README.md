@@ -22,7 +22,7 @@ test1 测试集，test_tgt 测试集label。     dev 验证集   dev-lable 验�
 
 其实BERT需要根据具体的问题来修改相对应的代码，NER算是序列标注一类的问题，可以算分类问题吧。
 
-然后修改的主要是run_classifier.py部分即可，我把修改后的存放到了run_classifier.py里。
+然后修改的主要是run_classifier.py部分即可，我把修改下游任务后的代码放到了run_NER.py里。
 
 之后会对其需要修改的部分进行解释。
 
