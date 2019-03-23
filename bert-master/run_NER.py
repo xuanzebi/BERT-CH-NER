@@ -253,6 +253,7 @@ class NerProcessor(DataProcessor):
 
     def get_test_examples(self, data_dir):
         fr = open(os.path.join(data_dir, 'test1.txt'), encoding='utf-8')
+        # 只读取数据集不读取类别。
         # fw_l = open(os.path.join(data_dir, 'test_tgt.txt'), encoding='utf-8')
         res = []
         lines = []
@@ -909,7 +910,7 @@ def main(_):
         # pred_out = os.path.join(FLAGS.output_dir, "test_pred.txt")
         fw = open(os.path.join(FLAGS.output_dir, "test_prediction.txt"), 'a+', encoding='utf-8')
         for i in result:
-            output = " ".join(id2label[id] for id in i if id != 0)
+            output = " ".join(id2label[id] for id in i if id != 0) + "\n"
             print('***********正在写入**************')
             fw.write(output)
         fw.close()
