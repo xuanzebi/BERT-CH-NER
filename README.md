@@ -40,7 +40,7 @@ CLS是每个句首前加一个标志[CLS]的类别，SEP是句尾同理。（因
 
 ### 训练
 
-首先下载BERT基于中文预训练的模型，
+首先下载BERT基于中文预训练的模型（BERT官方github页面可下载），存放到BERT_BASE_DIR文件夹下，之后将数据放到NER_DIR文件夹下。即可开始训练。
 
 ```shell
 export BERT_BASE_DIR=/opt/xxx/chinese_L-12_H-768_A-12
@@ -96,9 +96,7 @@ python run_NER.py \
 
 ### BERT论文
 
-这留个空给自己总结一下BERT论文里的知识和自己的理解。
-
-
+留个空二刷BERT论文时总结一下。
 
 
 
