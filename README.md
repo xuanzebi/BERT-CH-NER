@@ -16,6 +16,26 @@ tmp 文件夹下
 
 test1 测试集，test_tgt 测试集label。     dev 验证集   dev-lable 验证集label。
 
+#### 注意
+
+因为在处理中文时，会有一些奇怪的符号，比如\u3000等，需要你提前处理，否则label_id和inputs_id对应不上，因为bert自带的tokenization会处理掉这些符号。所以可以使用bert自带的BasicTokenizer来先将数据文本与处理一下。
+
+```python
+tokenizer = tokenization.BasicTokenizer(do_lower_case=True)
+text = tokenizer.tokenize(text)
+text = ''.join([l for l in text])
+```
+
+#### 数据格式
+
+```python
+ 需要将数据处理成如下格式，一个句子对应一个label.句子和label的每个字都用空格分开。
+ 如: line = [我 爱 国 科 大 哈 哈]   str
+     label = [O O B I E O O]       str的type 用空格分开
+    
+具体请看代码中的NerProcessor 和 NerBaiduProcessor
+```
+
 #### 类别
 
 ![1553304765330](https://github.com/xuanzebi/BERT-NER/blob/master/images/1553304765330.png)
@@ -32,9 +52,7 @@ CLS是每个句首前加一个标志[CLS]的类别，SEP是句尾同理。（因
 
 然后修改的主要是run_classifier.py部分即可，我把修改下游任务后的代码放到了run_NER.py里。
 
-之后会对其需要修改的部分进行解释。
-
-待更新==
+代码中除了数据部分的预处理之外，还需要自己修改一下评估函数、损失函数。
 
 
 
@@ -88,15 +106,15 @@ python run_NER.py \
 
 其实在读了BERT的论文后，结合代码进行下游任务的微调能够理解的更深刻。
 
-其实改造下游任务主要是把自己数据改造成它们需要的格式，然后将输出类别根据需要改一下，然后模型的metric函数改一下就整体差不多了。
+其实改造下游任务主要是把自己数据改造成它们需要的格式，然后将输出类别根据需要改一下，然后修改一下评估函数和损失函数。
 
 如下图根据具体的下游任务修改label即可。如下图的第四个就是在NER上进行修改，
 
 ![1553306691480](https://github.com/xuanzebi/BERT-NER/blob/master/images/1553306691480.png)
 
-### BERT论文
+之后会写一篇Attention is all you need 和 bert论文的详解，会结合代码来解释一下细节，比如Add & Norm是如何实现的，为什么要Add & Norm。 
 
-留个空二刷BERT论文时总结一下。
+欢迎大家关注我的博客。
 
 
 
@@ -107,9 +125,3 @@ python run_NER.py \
 > https://github.com/kyzhouhzau/BERT-NER  基于英文的NER，但是代码注释不太多。
 
 
-
-
-
-
-
-有时间了更新剩下的readme 、 包括对源码的注释和如何根据NER下游任务来修改代码等====
