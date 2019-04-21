@@ -225,6 +225,7 @@ class DataProcessor(object):
             for line in trn_data:
                 text = line['text'].strip()
                 text = tokenizer.tokenize(text)
+                text = ''.join([l for l in text])
                 label = ['O'] * len(text)
                 spo_list = line['spo_list']
                 sub_ = []
@@ -284,14 +285,16 @@ class DataProcessor(object):
                         elif sp[0] < i < sp[1] - 1:
                             label[i] = 'I2'
 
-                train_data.append([list(text), label])
-                return train_data
+                l = ' '.join([la for la in label])
+                w = ' '.join([word for word in text])
+                train_data.append((w, l))
+            return train_data
         elif mode == 'test':
             test_data = []
             for line in trn_data:
                 text = line['text'].strip()
                 label = ['O'] * len(text)
-                test_data.append([list(text), label])
+                test_data.append((list(text), label))
             return test_data
 
 
