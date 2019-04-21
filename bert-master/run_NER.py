@@ -207,8 +207,101 @@ class DataProcessor(object):
                 lines.append(line)
             return lines
 
+    @classmethod
+    def _read_data(cls, input_file, mode='train'):
+        """
+            对应下文的百度比赛的数据处理。
+            http://lic2019.ccf.org.cn/kg
+            其中有两个地方注意下。 这里先将数据用bert的BasicTokenizer处理一下把一些奇奇怪怪的字符处理掉。如果不处理的话，
+            后文的inputs_id和label_id 对应不上，因为你的label_id是带有那些奇怪的字符的。而bert处理过后不带。
+                    tokenizer = tokenization.BasicTokenizer(do_lower_case=True)
+                    text = tokenizer.tokenize(text)
+        """
+        import json
+        tokenizer = tokenization.BasicTokenizer(do_lower_case=True)
+        trn_data = json.load(open(input_file, encoding='utf-8'))
+        if mode == 'train':
+            train_data = []
+            for line in trn_data:
+                text = line['text'].strip()
+                text = tokenizer.tokenize(text)
+                label = ['O'] * len(text)
+                spo_list = line['spo_list']
+                sub_ = []
+                obj_ = []
+                for i in spo_list:
+                    sub_.append(i[0])
+                    obj_.append(i[2])
+                ent_spans = []
+                for sub in sub_:
+                    if sub == None:
+                        last_idx = 0
+                        while True:
+                            if last_idx >= len(text):
+                                break
+                            start = text[last_idx:].find(sub)
+                            if start == -1:
+                                break
+                            end = start + len(sub)
+                            ent_spans.append((start + last_idx, end + last_idx))
+                            last_idx = end + last_idx
+                ent_obj = []
+                for obj in obj_:
+                    last_idx = 0
+                    while True:
+                        if last_idx >= len(text):
+                            break
+                        start = text[last_idx:].find(obj)
+                        if start == -1:
+                            break
+                        end = start + len(obj)
+                        ent_obj.append((start + last_idx, end + last_idx))
+                        last_idx = end + last_idx
+
+                for i, c in enumerate(text):
+                    for sp in ent_spans:
+                        if sp[0] == i:
+                            if sp[0] == sp[1]:
+                                label[i] = 'S1'
+                            else:
+                                label[i] = 'B1'
+                        elif sp[1] - 1 == i:
+                            label[i] = 'E1'
+
+                        elif sp[0] < i < sp[1] - 1:
+                            label[i] = 'I1'
+
+                for i, c in enumerate(text):
+                    for sp in ent_obj:
+                        if sp[0] == i:
+                            if sp[0] == sp[1]:
+                                label[i] = 'S2'
+                            else:
+                                label[i] = 'B2'
+                        elif sp[1] - 1 == i:
+                            label[i] = 'E2'
+
+                        elif sp[0] < i < sp[1] - 1:
+                            label[i] = 'I2'
+
+                train_data.append([list(text), label])
+                return train_data
+        elif mode == 'test':
+            test_data = []
+            for line in trn_data:
+                text = line['text'].strip()
+                label = ['O'] * len(text)
+                test_data.append([list(text), label])
+            return test_data
+
 
 class NerProcessor(DataProcessor):
+    """
+        将数据处理成 如下格式：
+                    如: line = [我 爱 国 科 大 哈 哈]   str
+                        label = [O O B I E O O]       str的type 用空格分开
+    """
+
     def get_train_examples(self, data_dir):
         fr = open(os.path.join(data_dir, 'source.txt'), encoding='utf-8')
         fw_l = open(os.path.join(data_dir, 'target.txt'), encoding='utf-8')
@@ -276,6 +369,37 @@ class NerProcessor(DataProcessor):
 
     def get_labels(self):
         return ["PAD", "B-LOC", "I-LOC", "B-ORG", "I-ORG", "B-PER", "I-PER", "O", "[CLS]", "[SEP]"]
+
+
+class NerBaiduProcessor(DataProcessor):
+    """
+        这里是在做百度的信息抽取比赛转换的格式，在处理过程中发现了一些问题。
+        1、中文中有一些空格\u3000等其他奇怪的字符，需要处理，见上方_read_data函数注解。
+    """
+
+    def get_train_examples(self, data_dir):
+        return self._create_example(self._read_data(os.path.join(data_dir, "train_data_me.json"), mode='train'),
+                                    "train")
+
+    def get_dev_examples(self, data_dir):
+        return self._create_example(self._read_data(os.path.join(data_dir, "dev_data_me.json"), mode='train'), "dev")
+
+    def get_test_examples(self, data_dir):
+        return self._create_example(
+            self._read_data(os.path.join(data_dir, "test_data_me.json"), mode='test'), "test"
+        )
+
+    def get_labels(self):
+        return ["PAD", "B1", "I1", "E1", "S1", "B2", "I2", "E2", "S2", "O", "[CLS]", "[SEP]"]
+
+    def _create_example(self, lines, set_type):
+        examples = []
+        for (i, line) in enumerate(lines):
+            guid = "%s-%s" % (set_type, i)
+            texts = tokenization.convert_to_unicode(line[0])
+            labels = tokenization.convert_to_unicode(line[1])
+            examples.append(InputExample(guid=guid, text_a=texts, label=labels))
+        return examples
 
 
 def convert_single_example(ex_index, example, label_list, max_seq_length,
@@ -351,28 +475,25 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
     # tokens are attended to.
     input_mask = [1] * len(input_ids)
 
+    # 这里的label因为是序列标注，需要与inputs_id对应上号。这里-2 是因为CLS 和 SEP
+    labellist = example.label.split(' ')
+    if len(labellist) > (max_seq_length - 2):
+        labellist = labellist[0:(max_seq_length - 2)]
+
     label_id = []
     label_id.append(label_map["[CLS]"])
-    labellist = example.label.split(' ')
-
     for i in labellist:
         if i in label_map.keys():
             label_id.append(label_map[i])
         else:
             label_id.append(label_map['PAD'])
 
-    label_id.append(label_map["[SEP]"])
     # Zero-pad up to the sequence length.
     while len(input_ids) < max_seq_length:
         input_ids.append(0)
         input_mask.append(0)
         segment_ids.append(0)
-
-    while len(label_id) < max_seq_length:
         label_id.append(label_map['PAD'])
-
-    if len(label_id) > max_seq_length:
-        label_id = label_id[:max_seq_length]
 
     assert len(input_ids) == max_seq_length
     assert len(input_mask) == max_seq_length
@@ -531,7 +652,7 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
         output_layer = tf.reshape(output_layer, [-1, hidden_size])
         logits = tf.matmul(output_layer, output_weight, transpose_b=True)
         logits = tf.nn.bias_add(logits, output_bias)
-        logits = tf.reshape(logits, [-1, FLAGS.max_seq_length, 10])
+        logits = tf.reshape(logits, [-1, FLAGS.max_seq_length, 10])  # 这里的10对应着总类别数。
         # mask = tf.cast(input_mask,tf.float32)
         # loss = tf.contrib.seq2seq.sequence_loss(logits,labels,mask)
         # return (loss, logits, predict)
@@ -613,6 +734,8 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
             def metric_fn(per_example_loss, label_ids, logits):
                 # def metric_fn(label_ids, logits):
                 predictions = tf.argmax(logits, axis=-1, output_type=tf.int32)
+                # 评估函数，计算准确率、召回率、F1，假如改类别的话，下方数字需要修改，10是总类别数，1-6是有用的类别。B、I、E，
+                # 具体见 tf.metrics里的函数
                 precision = tf_metrics.precision(label_ids, predictions, 10, [1, 2, 3, 4, 5, 6], average="macro")
                 recall = tf_metrics.recall(label_ids, predictions, 10, [1, 2, 3, 4, 5, 6], average="macro")
                 f = tf_metrics.f1(label_ids, predictions, 10, [1, 2, 3, 4, 5, 6], average="macro")
@@ -731,7 +854,7 @@ def main(_):
         # "mnli": MnliProcessor,
         # "mrpc": MrpcProcessor,
         # "xnli": XnliProcessor,
-        "ner": NerProcessor,
+        "ner": NerProcessor,  # 改为自己的processor
     }
 
     tokenization.validate_case_matches_checkpoint(FLAGS.do_lower_case,
