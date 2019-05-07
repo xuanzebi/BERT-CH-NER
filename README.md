@@ -16,23 +16,23 @@
 
 ##### 训练验证测试
 
-```python
+```shell
 export BERT_BASE_DIR=/opt/hanyaopeng/souhu/data/chinese_L-12_H-768_A-12
 export NER_DIR=/opt/hanyaopeng/souhu/data/data_v2
 python run_souhuv2.py \
-	--task_name=NER \
-    --do_train=true
-	--do_eval=true \
-	--do_predict=true \
-	--data_dir=$NER_DIR/ \
-	--output_dir=$BERT_BASE_DIR/outputv2/ \
-	--train_batch_size=32 \
-	--vocab_file=$BERT_BASE_DIR/vocab.txt \
-	--max_seq_length=256 \
-	--learning_rate=2e-5 \
-	--num_train_epochs=10.0 \
-	--bert_config_file=$BERT_BASE_DIR/bert_config.json \
-	--init_checkpoint=$BERT_BASE_DIR/bert_model.ckpt \
+                    --task_name=NER \
+                    --do_train=true
+                    --do_eval=true \
+                    --do_predict=true \
+                    --data_dir=$NER_DIR/ \
+                    --output_dir=$BERT_BASE_DIR/outputv2/ \
+                    --train_batch_size=32 \
+                    --vocab_file=$BERT_BASE_DIR/vocab.txt \
+                    --max_seq_length=256 \
+                    --learning_rate=2e-5 \
+                    --num_train_epochs=10.0 \
+                    --bert_config_file=$BERT_BASE_DIR/bert_config.json \
+                    --init_checkpoint=$BERT_BASE_DIR/bert_model.ckpt \
 
 ```
 
