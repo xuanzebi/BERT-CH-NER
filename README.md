@@ -1,5 +1,52 @@
 ## 基于BERT 的中文数据集下的命名实体识别(NER)
 
+### 一 搜狐比赛   
+
+<https://www.biendata.com/competition/sohu2019/>
+
+在搜狐这个文本比赛中写了一个baseline，使用了bert以及bert+lstm+crf来进行实体识别。
+
+其后只使用BERT的结果如下，具体评测方案请看比赛说明，这里的话只做了实体部分，情感全部为POS进行的测试得分。
+
+![1557228899471](https://github.com/xuanzebi/BERT-NER/blob/master/images/1557228899471.png)
+
+使用bert+lstm+crf 结果如下
+
+![1557228995787](https://github.com/xuanzebi/BERT-NER/blob/master/images/1557228995787.png)
+
+##### 训练验证测试
+
+```python
+export BERT_BASE_DIR=/opt/hanyaopeng/souhu/data/chinese_L-12_H-768_A-12
+export NER_DIR=/opt/hanyaopeng/souhu/data/data_v2
+python run_souhuv2.py \
+	--task_name=NER \
+    --do_train=true
+	--do_eval=true \
+	--do_predict=true \
+	--data_dir=$NER_DIR/ \
+	--output_dir=$BERT_BASE_DIR/outputv2/ \
+	--train_batch_size=32 \
+	--vocab_file=$BERT_BASE_DIR/vocab.txt \
+	--max_seq_length=256 \
+	--learning_rate=2e-5 \
+	--num_train_epochs=10.0 \
+	--bert_config_file=$BERT_BASE_DIR/bert_config.json \
+	--init_checkpoint=$BERT_BASE_DIR/bert_model.ckpt \
+
+```
+
+#### 代码
+
+在souhu文件下
+
+- souhu_util.py  文件是取得预测的label后，转换为实体的数据 处理代码。
+- lstm_crf_layer.py 是lstm+crf层的代码
+- run_souhu.py 只用bert的代码
+- run_souhuv2.py  bert+lstm+crf
+
+### 二 
+
 基于上课老师课程作业发布的中文数据集下使用BERT来训练命名实体识别NER任务。
 
 之前也用了Bi+LSTM+CRF进行识别，效果也不错，这次使用BERT来进行训练，也算是对BERT源码进行一个阅读和理解吧。
