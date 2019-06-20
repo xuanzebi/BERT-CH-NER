@@ -159,16 +159,32 @@ python run_NER.py \
 
 ![1553306691480](https://github.com/xuanzebi/BERT-NER/blob/master/images/1553306691480.png)
 
-之后会写一篇Attention is all you need 和 bert论文的详解，会结合代码来解释一下细节，比如Add & Norm是如何实现的，为什么要Add & Norm。 
+之后会写一篇Attention is all you need 和 bert论文的详解，会结合代码来解释一下细节，比如Add & Norm是如何实现的，为什么要Add & Norm。 ----感觉不用写了 bert已经火遍大街了   不重复造轮子了。建议大家直接莽源代码。
 
-欢迎大家关注我的博客。
+
+
+觉得pytorch版本的bert似乎更好用233，比如更方便的冻结BERT中间层，还可以在训练过程中梯度累积。
+
+最后BERT还有很多奇淫技巧需要大家来探索。。比如可以取中间层向量来拼接再比如冻结中间层等等。
+
+
+
+##### 今天刚看见一个文章，20项任务全面碾压BERT，CMU全新XLNet预训练模型屠榜（已开源）
+
+留坑，哈哈  读读论文看看代码去。
+
+> <https://mp.weixin.qq.com/s/29y2bg4KE-HNwsimD3aauw>
+>
+> <https://github.com/zihangdai/xlnet>
+
+
 
 
 
 > 参考 ：
 >
-> https://github.com/google-research/bert   官方
+> https://github.com/google-research/bert   
 >
-> https://github.com/kyzhouhzau/BERT-NER  基于英文的NER，但是代码注释不太多。
+> https://github.com/kyzhouhzau/BERT-NER 
 
 

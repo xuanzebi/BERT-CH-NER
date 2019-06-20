@@ -479,7 +479,10 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
     input_mask = [1] * len(input_ids)
 
     # 这里的label因为是序列标注，需要与inputs_id对应上号。这里-2 是因为CLS 和 SEP
+
     labellist = example.label.split(' ')
+    
+
     if len(labellist) > (max_seq_length - 2):
         labellist = labellist[0:(max_seq_length - 2)]
 
@@ -491,12 +494,20 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
         else:
             label_id.append(label_map['PAD'])
 
+    label_id.append(label_map["[SEP]"])
     # Zero-pad up to the sequence length.
     while len(input_ids) < max_seq_length:
         input_ids.append(0)
         input_mask.append(0)
         segment_ids.append(0)
         label_id.append(label_map['PAD'])
+    
+    # label_id 有问题 查看错误原因
+    if len(label_id) != max_seq_length:
+        print(len(input_ids),len(label_id))
+        print(example.text_a)
+        print(tokens)
+        print(input_ids,label_id)
 
     assert len(input_ids) == max_seq_length
     assert len(input_mask) == max_seq_length
