@@ -45,6 +45,18 @@ python run_souhuv2.py \
 - run_souhu.py 只用bert的代码
 - run_souhuv2.py  bert+lstm+crf
 
+#### 注意
+
+因为在处理中文时，会有一些奇怪的符号，比如\u3000等，需要你提前处理，否则label_id和inputs_id对应不上，因为bert自带的tokenization会处理掉这些符号。所以可以使用bert自带的BasicTokenizer来先将数据文本与处理一下。
+
+```python
+tokenizer = tokenization.BasicTokenizer(do_lower_case=True)
+text = tokenizer.tokenize(text)
+text = ''.join([l for l in text])
+```
+
+
+
 ### 二 
 
 基于上课老师课程作业发布的中文数据集下使用BERT来训练命名实体识别NER任务。
@@ -63,15 +75,7 @@ tmp 文件夹下
 
 test1 测试集，test_tgt 测试集label。     dev 验证集   dev-lable 验证集label。
 
-#### 注意
 
-因为在处理中文时，会有一些奇怪的符号，比如\u3000等，需要你提前处理，否则label_id和inputs_id对应不上，因为bert自带的tokenization会处理掉这些符号。所以可以使用bert自带的BasicTokenizer来先将数据文本与处理一下。
-
-```python
-tokenizer = tokenization.BasicTokenizer(do_lower_case=True)
-text = tokenizer.tokenize(text)
-text = ''.join([l for l in text])
-```
 
 #### 数据格式
 
@@ -115,7 +119,7 @@ CLS是每个句首前加一个标志[CLS]的类别，SEP是句尾同理。（因
 
 ### 训练
 
-首先下载BERT基于中文预训练的模型（BERT官方github页面可下载），存放到BERT_BASE_DIR文件夹下，之后将数据放到NER_DIR文件夹下。即可开始训练。
+首先下载BERT基于中文预训练的模型（BERT官方github页面可下载），存放到BERT_BASE_DIR文件夹下，之后将数据放到NER_DIR文件夹下。即可开始训练。sh run.sh
 
 ```shell
 export BERT_BASE_DIR=/opt/xxx/chinese_L-12_H-768_A-12
@@ -169,13 +173,13 @@ python run_NER.py \
 
 ![1553306691480](https://github.com/xuanzebi/BERT-NER/blob/master/images/1553306691480.png)
 
-之后会写一篇Attention is all you need 和 bert论文的详解，会结合代码来解释一下细节，比如Add & Norm是如何实现的，为什么要Add & Norm。 ----感觉不用写了 bert已经火遍大街了   不重复造轮子了。建议大家直接莽源代码。
+之后会写一篇Attention is all you need 和 bert论文的详解，会结合代码来解释一下细节，比如Add & Norm是如何实现的，为什么要Add & Norm。 ==感觉不用写了 bert已经火遍大街了   不重复造轮子了。建议大家直接莽源代码和论文。
 
 
 
 觉得pytorch版本的bert似乎更好用233，比如更方便的冻结BERT中间层，还可以在训练过程中梯度累积。
 
-最后BERT还有很多奇淫技巧需要大家来探索。。比如可以取中间层向量来拼接再比如冻结中间层等等。
+最后BERT还有很多奇淫技巧需要大家来探索。。比如可以取中间层向量来拼接，再比如冻结中间层等等。
 
 
 
@@ -187,7 +191,7 @@ python run_NER.py \
 
 
 
-##### 今天刚看见一个文章，20项任务全面碾压BERT，CMU全新XLNet预训练模型屠榜（已开源）
+##### 今天又出来一个叼模型，20项任务全面碾压BERT，CMU全新XLNet预训练模型屠榜（已开源）
 
 留坑，哈哈  读读论文看看代码去。
 

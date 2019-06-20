@@ -1,5 +1,5 @@
-export BERT_BASE_DIR=D:/nlp/bert/chinese_L-12_H-768_A-12
-export NER_DIR=C:/github/BERT-NER/tmp
+export BERT_BASE_DIR=./nlp/bert/chinese_L-12_H-768_A-12
+export NER_DIR=./github/BERT-NER/tmp
 python run_NER.py \
           --task_name=NER \
           --do_train=true \
