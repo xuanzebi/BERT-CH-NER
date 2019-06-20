@@ -83,6 +83,16 @@ text = ''.join([l for l in text])
 具体请看代码中的NerProcessor 和 NerBaiduProcessor
 ```
 
+#### 注意
+
+数据有一些有问题
+
+比如 输入叩 问 澳 门 =- =- =- 贺 澳 门 回 归 进 入 倒 计 时 ，label :O O B-LOC I-LOC O O O O B-LOC I-LOC O O O O O O O  
+
+`text = tokenization.convert_to_unicode(line[0])`会把输入的=- 处理成两个字符，所以会导致label对应不上，需要手动处理一下。
+
+
+
 #### 类别
 
 ![1553304765330](https://github.com/xuanzebi/BERT-NER/blob/master/images/1553304765330.png)
@@ -169,6 +179,14 @@ python run_NER.py \
 
 
 
+> 参考 ：
+>
+> https://github.com/google-research/bert   
+>
+> https://github.com/kyzhouhzau/BERT-NER 
+
+
+
 ##### 今天刚看见一个文章，20项任务全面碾压BERT，CMU全新XLNet预训练模型屠榜（已开源）
 
 留坑，哈哈  读读论文看看代码去。
@@ -176,15 +194,5 @@ python run_NER.py \
 > <https://mp.weixin.qq.com/s/29y2bg4KE-HNwsimD3aauw>
 >
 > <https://github.com/zihangdai/xlnet>
-
-
-
-
-
-> 参考 ：
->
-> https://github.com/google-research/bert   
->
-> https://github.com/kyzhouhzau/BERT-NER 
 
 
