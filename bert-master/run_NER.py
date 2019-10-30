@@ -36,28 +36,28 @@ FLAGS = flags.FLAGS
 
 ## Required parameters
 flags.DEFINE_string(
-    "data_dir", None,
+    "data_dir", '../tmp',
     "The input data dir. Should contain the .tsv files (or other data files) "
     "for the task.")
 
 flags.DEFINE_string(
-    "bert_config_file", None,
+    "bert_config_file", '/data/chinese_L-12_H-768_A-12/bert_config.json',
     "The config json file corresponding to the pre-trained BERT model. "
     "This specifies the model architecture.")
 
-flags.DEFINE_string("task_name", None, "The name of the task to train.")
+flags.DEFINE_string("task_name", 'NER', "The name of the task to train.")
 
-flags.DEFINE_string("vocab_file", None,
+flags.DEFINE_string("vocab_file", '/data/chinese_L-12_H-768_A-12/vocab.txt',
                     "The vocabulary file that the BERT model was trained on.")
 
 flags.DEFINE_string(
-    "output_dir", None,
+    "output_dir", '/data/chinese_L-12_H-768_A-12/output',
     "The output directory where the model checkpoints will be written.")
 
 ## Other parameters
 
 flags.DEFINE_string(
-    "init_checkpoint", None,
+    "init_checkpoint", '/data/chinese_L-12_H-768_A-12/bert_model.ckpt',
     "Initial checkpoint (usually from a pre-trained BERT model).")
 
 flags.DEFINE_bool(
@@ -76,7 +76,7 @@ flags.DEFINE_bool("do_train", False, "Whether to run training.")
 flags.DEFINE_bool("do_eval", False, "Whether to run eval on the dev set.")
 
 flags.DEFINE_bool(
-    "do_predict", False,
+    "do_predict", True,
     "Whether to run the model in inference mode on the test set.")
 
 flags.DEFINE_integer("train_batch_size", 32, "Total batch size for training.")
@@ -350,16 +350,15 @@ class NerProcessor(DataProcessor):
     def get_test_examples(self, data_dir):
         fr = open(os.path.join(data_dir, 'test1.txt'), encoding='utf-8')
         # 只读取数据集不读取类别。
-        # fw_l = open(os.path.join(data_dir, 'test_tgt.txt'), encoding='utf-8')
+        fw_l = open(os.path.join(data_dir, 'test_tgt.txt'), encoding='utf-8')
         res = []
         lines = []
         label = []
         examples = []
         for i in fr.readlines():
             lines.append(i.strip())
-            label.append('NIUBI')
-        # for i in fw_l.readlines():
-        #     label.append(i.strip())
+        for i in fw_l.readlines():
+            label.append(i.strip())
         for i in range(len(lines)):
             res.append([lines[i], label[i]])
 
@@ -422,11 +421,15 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
         label_map[label] = i
 
     la = example.label.split(' ')
+    exa = example.text_a.split(' ')
+    if len(la) != len(exa):
+        print(la,exa)
+    assert len(la) == len(exa)
 
     tokens_a = []
     labellist = []
 
-    for i,t in enumerate(example.text_a.split(' ')):
+    for i,t in enumerate(exa):
         tt = tokenizer.tokenize(t)
         if len(tt) == 1 :
             tokens_a.append(tt[0])
@@ -453,6 +456,9 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
         if len(tokens_a) > max_seq_length - 2:
             tokens_a = tokens_a[0:(max_seq_length - 2)]
 
+    if len(labellist) > (max_seq_length - 2):
+        labellist = labellist[0:(max_seq_length - 2)]
+
     # The convention in BERT is:
     # (a) For sequence pairs:
     #  tokens:   [CLS] is this jack ##son ##ville ? [SEP] no it is not . [SEP]
@@ -475,6 +481,7 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
     segment_ids = []
     tokens.append("[CLS]")
     segment_ids.append(0)
+
     for token in tokens_a:
         tokens.append(token)
         segment_ids.append(0)
@@ -496,14 +503,9 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
 
     # 这里的label因为是序列标注，需要与inputs_id对应上号。这里-2 是因为CLS 和 SEP
 
-    labellist = example.label.split(' ')
-    
-
-    if len(labellist) > (max_seq_length - 2):
-        labellist = labellist[0:(max_seq_length - 2)]
-
     label_id = []
     label_id.append(label_map["[CLS]"])
+
     for i in labellist:
         if i in label_map.keys():
             label_id.append(label_map[i])
