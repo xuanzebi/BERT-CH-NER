@@ -1,6 +1,16 @@
 ## 基于BERT 的中文数据集下的命名实体识别(NER)
 
-### 一 搜狐比赛   
+基于tensorflow官方代码修改。
+
+### 环境
+
+Tensorflow: 1.13
+
+Python: 3.6 
+
+tensorflow2.0 会报错。
+
+##  搜狐比赛   
 
 <https://www.biendata.com/competition/sohu2019/>
 
@@ -57,7 +67,7 @@ text = ''.join([l for l in text])
 
 
 
-### 二 
+## 二
 
 基于上课老师课程作业发布的中文数据集下使用BERT来训练命名实体识别NER任务。
 
