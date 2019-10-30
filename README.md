@@ -47,7 +47,7 @@ python run_souhuv2.py \
 
 #### 注意
 
-因为在处理中文时，会有一些奇怪的符号，比如\u3000等，需要你提前处理，否则label_id和inputs_id对应不上，因为bert自带的tokenization会处理掉这些符号。所以可以使用bert自带的BasicTokenizer来先将数据文本与处理一下。
+因为在处理中文时，会有一些奇怪的符号，比如\u3000等，需要你提前处理，否则label_id和inputs_id对应不上，因为bert自带的tokenization会处理掉这些符号。所以可以使用bert自带的BasicTokenizer来先将数据文本预处理一下从而与label对应上。
 
 ```python
 tokenizer = tokenization.BasicTokenizer(do_lower_case=True)
@@ -89,11 +89,29 @@ test1 测试集，test_tgt 测试集label。     dev 验证集   dev-lable 验�
 
 #### 注意
 
-数据有一些有问题
+BERT分词器在对字符分词会遇到一些问题。
 
 比如 输入叩 问 澳 门 =- =- =- 贺 澳 门 回 归 进 入 倒 计 时 ，label :O O B-LOC I-LOC O O O O B-LOC I-LOC O O O O O O O  
 
-`text = tokenization.convert_to_unicode(line[0])`会把输入的=- 处理成两个字符，所以会导致label对应不上，需要手动处理一下。
+会把输入的=- 处理成两个字符，所以会导致label对应不上，需要手动处理一下。比如如下每次取第一个字符的label。 其实这个问题在处理英文会遇到，WordPiece会将一个词分成若干token,所以需要手动处理（这只是一个简单处理方式）。
+
+```
+    la = example.label.split(' ')
+
+    tokens_a = []
+    labellist = []
+
+    for i,t in enumerate(example.text_a.split(' ')):
+        tt = tokenizer.tokenize(t)
+        if len(tt) == 1 :
+            tokens_a.append(tt[0])
+            labellist.append(la[i])
+        elif len(tt) > 1:
+            tokens_a.append(tt[0])
+            labellist.append(la[i])
+
+    assert len(tokens_a) == len(labellist)
+```
 
 
 
@@ -173,21 +191,27 @@ python run_NER.py \
 
 ![1553306691480](https://github.com/xuanzebi/BERT-NER/blob/master/images/1553306691480.png)
 
-之后会写一篇Attention is all you need 和 bert论文的详解，会结合代码来解释一下细节，比如Add & Norm是如何实现的，为什么要Add & Norm。 ==感觉不用写了 bert已经火遍大街了   不重复造轮子了。建议大家直接莽源代码和论文。
-
-
-
-觉得pytorch版本的bert似乎更好用233，比如更方便的冻结BERT中间层，还可以在训练过程中梯度累积。
+之后会写一篇Attention is all you need 和 bert论文的详解，会结合代码来解释一下细节，比如Add & Norm是如何实现的，为什么要Add & Norm。 ==  感觉不用写了 bert已经火遍大街了   不重复造轮子了。建议大家直接莽源代码和论文。
 
 最后BERT还有很多奇淫技巧需要大家来探索。。比如可以取中间层向量来拼接，再比如冻结中间层等等。
 
 
+
+后来自己又用pytorch版本的BERT做了几个比赛和做实验发论文，个人觉得pytorch版本的bert更简单好用，更方便的冻结BERT中间层，还可以在训练过程中梯度累积，直接继承BERTmodel就可以写自己的模型了。
+
+（自己用pytorch又做了NER的BERT实验，想开源但是懒得整理....哪天闲了再开源吧  ps 网上已经一大堆开源了233）
+
+pytorch真香..改起来比tensorflow简单多了.. 
+
+个人建议 如果自己做比赛或者发论文做实验用pytorch版本.. pytorch已经在学术界称霸了..但是工业界tensorflow还是应用很广。   
 
 > 参考 ：
 >
 > https://github.com/google-research/bert   
 >
 > https://github.com/kyzhouhzau/BERT-NER 
+>
+> https://github.com/huggingface/transformers   pytorch版本
 
 
 
@@ -198,5 +222,10 @@ python run_NER.py \
 > <https://mp.weixin.qq.com/s/29y2bg4KE-HNwsimD3aauw>
 >
 > <https://github.com/zihangdai/xlnet>
+
+
+
+好吧 前几天又看见了谷歌开源的T5模型，从XLNet、RoBERTa、ALBERT、SpanBERT发展到现在T5....根本顶不住.. 现在NLP比赛基本也都被预训练霸榜了..不用预训练根本拿不到好成绩...
+
 
 

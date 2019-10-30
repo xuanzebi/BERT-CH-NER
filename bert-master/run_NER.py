@@ -420,7 +420,23 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
     label_map = {}
     for (i, label) in enumerate(label_list):
         label_map[label] = i
-    tokens_a = tokenizer.tokenize(example.text_a)
+
+    la = example.label.split(' ')
+
+    tokens_a = []
+    labellist = []
+
+    for i,t in enumerate(example.text_a.split(' ')):
+        tt = tokenizer.tokenize(t)
+        if len(tt) == 1 :
+            tokens_a.append(tt[0])
+            labellist.append(la[i])
+        elif len(tt) > 1:
+            tokens_a.append(tt[0])
+            labellist.append(la[i])
+
+    assert len(tokens_a) == len(labellist)
+
     if len(tokens_a) > max_seq_length:
         tokens_a = tokens_a[:max_seq_length]
     tokens_b = None
