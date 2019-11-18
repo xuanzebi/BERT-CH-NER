@@ -1063,12 +1063,13 @@ def main(_):
         print(id2label)
 
         # pred_out = os.path.join(FLAGS.output_dir, "test_pred.txt")
-        fw = open(os.path.join(FLAGS.output_dir, "test_prediction.txt"), 'a+', encoding='utf-8')
+        print('******************正在写入测试结果*********************')
+        fw = open(os.path.join(FLAGS.output_dir, "test_prediction.txt"), 'w', encoding='utf-8')
         for i in result:
             output = " ".join(id2label[id] for id in i if id != 0) + "\n"
-            print('***********正在写入**************')
             fw.write(output)
         fw.close()
+        print("*********************写入完成********************")
 
         # with open(pred_out, 'w') as writer:
         #     for prediction in result:
